@@ -388,8 +388,6 @@ class ConferenceApi(remote.Service):
 
 # - - - Session objects - - - - - - - - - - - - - - - - - -
 
-# - - - Task 1 - - - - - - - - - - - - -
-
     def _copySessionToForm(self, session, conferenceName):
         """Copy relevant fields from Session to SessionForm."""
         sf = SessionForm()
@@ -581,7 +579,7 @@ class ConferenceApi(remote.Service):
             q = q.filter(formatted_query)
         return q
 
-# - - Task 2 - - - - - - - - - - - - - - - - - -
+# - - User Wishlist - - - - - - - - - - - - - - - - - -
 
     @endpoints.method(SESSION_GET_REQUEST, BooleanMessage,
                       path='sessionWishlist/{sessionKey}',
@@ -664,7 +662,6 @@ class ConferenceApi(remote.Service):
                     ses, getattr(ses.key.parent().get(), 'name'))
                     for ses in sessions if ses.typeOfSession != "workshop"])
 
-# -- Task 3 - - - - - - - - - - - - - - -
 
     @endpoints.method(SESSION_GET_TIME_REQUEST, SessionForms,
                       path='getConfSessionsByTime/{websafeConferenceKey}',
@@ -734,7 +731,6 @@ class ConferenceApi(remote.Service):
 
 # - - - Featured Speaker - - - - - - - - - - - - - - -
 
-    # Task 4
     @endpoints.method(message_types.VoidMessage, SpeakerForm,
                       http_method='GET', name='getFeaturedSpeaker')
     def getFeaturedSpeaker(self, request):
