@@ -4,8 +4,6 @@
 main.py -- Udacity conference server-side Python App Engine
     HTTP controller handlers for memcache & task queue access
 
-$Id$
-
 created on 2014 may 24
 
 """
