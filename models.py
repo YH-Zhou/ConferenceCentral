@@ -2,7 +2,7 @@
 
 """models.py
 
-Udacity conference server-side Python App Engine data & ProtoRPC models
+conference server-side Python App Engine data & ProtoRPC models
 
 $Id: models.py,v 1.1 2014/05/24 22:01:10 wesc Exp $
 
@@ -110,6 +110,7 @@ class Session(Conference):
     typeOfSession = ndb.StringProperty()
     date = ndb.DateProperty()
     startTime = ndb.TimeProperty()
+    conferenceName = ndb.StringProperty()
 
 
 class SessionForm(messages.Message):
@@ -124,7 +125,7 @@ class SessionForm(messages.Message):
     startTime = messages.StringField(8)
     websafeKey = messages.StringField(9)
     conferenceName = messages.StringField(10)
-    organizerUserId = messages.StringField(12)
+    organizerUserId = messages.StringField(11)
 
 
 class SessionForms(messages.Message):

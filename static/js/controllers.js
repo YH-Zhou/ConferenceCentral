@@ -152,7 +152,13 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
             'London',
             'Paris',
             'San Francisco',
-            'Tokyo'
+            'Tokyo',
+            'New York',
+            'Beijing',
+            'Las Vegas',
+            'New Jersey',
+            'HongKong',
+            'Berlin'
         ];
 
         /**
@@ -161,9 +167,14 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
          */
         $scope.topics = [
             'Medical Innovations',
+            'Network Technologies',
+            'Big Data',
+            'Operating Systems',
+            'Machine Learning',
             'Programming Languages',
             'Web Technologies',
             'Movie Making',
+            'Biological Breakthroughs',
             'Health and Nutrition'
         ];
 
@@ -241,6 +252,125 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
                 });
         };
     });
+
+
+
+/**
+ * @ngdoc controller
+ * @name CreateSessionCtrl
+ *
+ * @description
+ * A controller used for the Create sessions page.
+ */
+conferenceApp.controllers.controller('CreateSessionCtrl',
+    function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
+
+        /**
+         * The session object being edited in the page.
+         * @type {{}|*}
+         */
+        $scope.session = $scope.session || {};
+
+        
+        $scope.conferences = [{'name':'web'}];
+
+        $scope.getCreatedConfs = function () {
+            if (!oauth2Provider.signedIn) {
+                $scope.messages = "Sorry, please create your own conferences before add any sessions.";
+                return;
+            }
+            $scope.getConferencesCreated();
+        };
+
+        /**
+         * Invokes the conference.getConferencesCreated method.
+         */
+        $scope.getConferencesCreated = function () {
+            $scope.loading = true;
+            gapi.client.conference.getConferencesCreated().
+                execute(function (resp) {
+                    $scope.$apply(function () {
+                        $scope.loading = false;
+                        if (resp.error) {
+                            // The request has failed.
+                            var errorMessage = resp.error.message || '';
+                            $scope.messages = 'Failed to query the conferences created : ' + errorMessage;
+                            $scope.alertStatus = 'warning';
+                            $log.error($scope.messages);
+
+                            if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
+                                oauth2Provider.showLoginModal();
+                                return;
+                            }
+                        } else {
+                            // The request has succeeded.
+                            $scope.submitted = false;
+                            $scope.messages = 'Query succeeded : Conferences you have created';
+                            $scope.alertStatus = 'success';
+                            $log.info($scope.messages);
+
+                            angular.forEach(resp.items, function (conference) {
+                                $scope.conferences.push(conference);
+                            });
+                        }
+                        $scope.submitted = true;
+                    });
+                });
+        };
+
+        /**
+         * Holds the default values for the input candidates for topics select.
+         * @type {string[]}
+         */
+        $scope.types = [
+            'Keynote',
+            'Lecture',
+            'Workshop'
+        ];
+
+
+
+        /**
+         * Invokes the conference.createConference API.
+         *
+         * @param conferenceForm the form object.
+         */
+        $scope.createSession = function (sessionForm) {
+            if (!$scope.isValidConference(conferenceForm)) {
+                return;
+            }
+
+            $scope.loading = true;
+            gapi.client.session.createSession($scope.session).
+                execute(function (resp) {
+                    $scope.$apply(function () {
+                        $scope.loading = false;
+                        if (resp.error) {
+                            // The request has failed.
+                            var errorMessage = resp.error.message || '';
+                            $scope.messages = 'Failed to create a session : ' + errorMessage;
+                            $scope.alertStatus = 'warning';
+                            $log.error($scope.messages + ' Session : ' + JSON.stringify($scope.session));
+
+                            if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
+                                oauth2Provider.showLoginModal();
+                                return;
+                            }
+                        } else {
+                            // The request has succeeded.
+                            $scope.messages = 'The session has been created : ' + resp.result.name;
+                            $scope.alertStatus = 'success';
+                            $scope.submitted = false;
+                            $scope.session = {};
+                            $log.info($scope.messages + ' : ' + JSON.stringify(resp.result));
+                        }
+                    });
+                });
+        };
+
+    
+    });
+
 
 /**
  * @ngdoc controller

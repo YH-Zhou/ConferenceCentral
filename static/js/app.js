@@ -28,6 +28,10 @@ var app = angular.module('conferenceApp',
                     templateUrl: '/partials/conference_detail.html',
                     controller: 'ConferenceDetailCtrl'
                 }).
+                when('/session/create', {
+                    templateUrl: '/partials/create_session.html',
+                    controller: 'CreateSessionCtrl'
+                }).
                 when('/profile', {
                     templateUrl: '/partials/profile.html',
                     controller: 'MyProfileCtrl'
