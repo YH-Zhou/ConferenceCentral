@@ -272,9 +272,8 @@ conferenceApp.controllers.controller('CreateSessionCtrl',
         $scope.session = $scope.session || {};
 
         
-        $scope.conferences = [{'name':'web'}];
-
-        $scope.getCreatedConfs = function () {
+        $scope.conferences = [];
+        $scope.init = function () {
             if (!oauth2Provider.signedIn) {
                 $scope.messages = "Sorry, please create your own conferences before add any sessions.";
                 return;
@@ -305,7 +304,7 @@ conferenceApp.controllers.controller('CreateSessionCtrl',
                         } else {
                             // The request has succeeded.
                             $scope.submitted = false;
-                            $scope.messages = 'Query succeeded : Conferences you have created';
+                            //$scope.messages = 'Query succeeded : Conferences you have created';
                             $scope.alertStatus = 'success';
                             $log.info($scope.messages);
 
@@ -336,12 +335,14 @@ conferenceApp.controllers.controller('CreateSessionCtrl',
          * @param conferenceForm the form object.
          */
         $scope.createSession = function (sessionForm) {
+        /**
             if (!$scope.isValidConference(conferenceForm)) {
                 return;
             }
 
+        **/
             $scope.loading = true;
-            gapi.client.session.createSession($scope.session).
+            gapi.client.conference.createSession($scope.session).
                 execute(function (resp) {
                     $scope.$apply(function () {
                         $scope.loading = false;
@@ -710,6 +711,37 @@ conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $
         });
 
         $scope.loading = true;
+        gapi.client.conference.getConferenceSessions({
+            websafeConferenceKey: $routeParams.websafeConferenceKey
+        }).execute(function (resp) {
+                $scope.$apply(function () {
+                    $scope.loading = false;
+                    if (resp.error) {
+                        // The request has failed.
+                        var errorMessage = resp.error.message || '';
+                        $scope.messages = 'Failed to query the conference sessions : ' + errorMessage;
+                        $scope.alertStatus = 'warning';
+                        $log.error($scope.messages);
+
+                        if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
+                            oauth2Provider.showLoginModal();
+                            return;
+                        }
+                    } else {
+                        // The request has succeeded.
+                        $scope.submitted = false;
+                        $scope.alertStatus = 'success';
+
+                        $scope.sessions = [];
+                        angular.forEach(resp.items, function (session) {
+                            $scope.sessions.push(session);
+                        });
+                    }
+                    $scope.submitted = true;
+                });
+            });
+
+        $scope.loading = true;
         // If the user is attending the conference, updates the status message and available function.
         gapi.client.conference.getProfile().execute(function (resp) {
             $scope.$apply(function () {
@@ -811,6 +843,146 @@ conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $
     };
 });
 
+/**
+ * @ngdoc controller
+ * @name SessionDetailCtrl
+ *
+ * @description
+ * A controller used for the session detail page.
+ */
+conferenceApp.controllers.controller('SessionDetailCtrl', function ($scope, $log, $routeParams, HTTP_ERRORS) {
+
+    $scope.session = {};
+
+    $scope.isInWishlist = false;
+
+    /**
+     * Initializes the session detail page.
+     * Invokes the conference.getSession method and sets the returned session in the $scope.
+     *
+     */
+    $scope.init = function () {
+        $scope.loading = true;
+        gapi.client.conference.getSession({
+            websafeSessionKey: $routeParams.websafeSessionKey
+        }).execute(function (resp) {
+            $scope.$apply(function () {
+                $scope.loading = false;
+                if (resp.error) {
+                    // The request has failed.
+                    var errorMessage = resp.error.message || '';
+                    $scope.messages = 'Failed to get the session : ' + $routeParams.websafeKey
+                        + ' ' + errorMessage;
+                    $scope.alertStatus = 'warning';
+                    $log.error($scope.messages);
+                } else {
+                    // The request has succeeded.
+                    $scope.alertStatus = 'success';
+                    $scope.session = resp.result;
+                }
+            });
+        });
+
+
+        $scope.loading = true;
+        // If the session is in users' wishlists, updates the status message and available function.
+        gapi.client.conference.getProfile().execute(function (resp) {
+            $scope.$apply(function () {
+                $scope.loading = false;
+                if (resp.error) {
+                    // Failed to get a user profile.
+                } else {
+                    var profile = resp.result;
+                    for (var i = 0; i < profile.sessionWishlist.length; i++) {
+                        if ($routeParams.websafeKey == profile.sessionWishlist[i]) {
+                            // This session is in the user's wishlist.
+                            $scope.alertStatus = 'info';
+                            $scope.messages = 'You have added this session to your wishlist';
+                            $scope.isInWishlist = true;
+                        }
+                    }
+                }
+            });
+        });
+    };
+
+
+    /**
+     * Invokes the conference.addSessionToWishlist method.
+     */
+    $scope.addToWishlist = function () {
+        $scope.loading = true;
+        gapi.client.conference.addSessionToWishlist({
+            websafeSessionKey: $routeParams.websafeSessionKey
+        }).execute(function (resp) {
+            $scope.$apply(function () {
+                $scope.loading = false;
+                if (resp.error) {
+                    // The request has failed.
+                    var errorMessage = resp.error.message || '';
+                    $scope.messages = 'Failed to add this session to wishlist : ' + errorMessage;
+                    $scope.alertStatus = 'warning';
+                    $log.error($scope.messages);
+
+                    if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
+                        oauth2Provider.showLoginModal();
+                        return;
+                    }
+                } else {
+                    if (resp.result) {
+                        // Register succeeded.
+                        $scope.messages = 'Added this session to your wishlist';
+                        $scope.alertStatus = 'success';
+                        $scope.isInWishlist = true;
+                    } else {
+                        $scope.messages = 'Failed to add this session to wishlist';
+                        $scope.alertStatus = 'warning';
+                    }
+                }
+            });
+        });
+    };
+
+    /**
+     * Invokes the conference.removeSessionFromWishlist method.
+     */
+    $scope.removeFromWishlist = function () {
+        $scope.loading = true;
+        gapi.client.conference.removeSessionFromWishlist({
+            websafeSessionKey: $routeParams.websafeSessionKey
+        }).execute(function (resp) {
+            $scope.$apply(function () {
+                $scope.loading = false;
+                if (resp.error) {
+                    // The request has failed.
+                    var errorMessage = resp.error.message || '';
+                    $scope.messages = 'Failed to remove session from user wishlist : ' + errorMessage;
+                    $scope.alertStatus = 'warning';
+                    $log.error($scope.messages);
+                    if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
+                        oauth2Provider.showLoginModal();
+                        return;
+                    }
+                } else {
+                    if (resp.result) {
+                        // Removal succeeded.
+                        $scope.messages = 'Removed the session from your wishlist';
+                        $scope.alertStatus = 'success';
+                        $scope.conference.seatsAvailable = $scope.conference.seatsAvailable + 1;
+                        $scope.isInWishlist = false;
+                        $log.info($scope.messages);
+                    } else {
+                        var errorMessage = resp.error.message || '';
+                        $scope.messages = 'Failed to remove session from wishlist : ' + $routeParams.websafeKey +
+                            ' : ' + errorMessage;
+                        $scope.alertStatus = 'warning';
+                        $log.error($scope.messages);
+                    }
+                }
+            });
+        });
+    };
+});
 
 /**
  * @ngdoc controller

@@ -32,6 +32,19 @@
             <form class="form" novalidate role="form">
                 <fieldset>
                     <div>
+                        <label for="description">Description: </label>
+                        <span id="description">{{conference.description}}
+                        </span>
+                    </div>
+
+                    <div>
+                        <label for="sessions">Sessions: </label>
+                        <span id="sessions">
+                            <a href="#/session/detail/{{session.websafeKey}}"><span ng-repeat="session in sessions" class="label label-primary label-separated">{{session.name}}</span></a>
+                        </span>
+                    </div>
+
+                    <div>
                         <label for="city">City: </label>
                         <span id="city">{{conference.city}}</span>
                     </div>
@@ -41,6 +54,8 @@
                             <span ng-repeat="topic in conference.topics" class="label label-primary label-separated">{{topic}}</span>
                         </span>
                     </div>
+
+
                     <div>
                         <label for="startDate">Start Date: </label>
                         <span id="startDate">{{conference.startDate | date:'dd-MMMM-yyyy'}}</span>

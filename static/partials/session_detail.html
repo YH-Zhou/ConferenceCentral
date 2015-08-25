@@ -1,0 +1,54 @@
+<div ng-controller="SessionDetailCtrl">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="messages" class="alert alert-{{alertStatus}}" ng-show="messages">
+                <span ng-bind="messages"></span>
+                <i class="dismiss-messages pull-right glyphicon glyphicon-remove" ng-click="messages = ''"
+                   ng-show="messages"></i>
+            </div>
+            <img class="spinner" src="/img/ajax-loader.gif" ng-show="loading"/>
+        </div>
+    </div>
+
+    <div class="row" ng-init="init()">
+        <div class="col-md-9">
+            <div class="well well-sm">
+                <h2>{{session.name}}</h2>
+                <h5>{{session.highlights}}</h5>
+                <div>
+                    <label for="conference">Conference: </label>
+                    <span id="conference">{{session.conferenceName}}</span>
+                </div>
+                <p><a class="btn btn-primary" ng-hide="isInWishlist" ng-click="addToWishlist()"
+                        ng-disabled="loading">Add to wishlist</a></p>
+                <p><a class="btn btn-primary" ng-show="isInWishlist" ng-click="removeFromWishlist()"
+                        ng-disabled="loading">Remove from wishlist</a></p>
+            </div>
+
+            <form class="form" novalidate role="form">
+                <fieldset>
+
+                    <div>
+                        <label for="speaker">Speaker: </label>
+                        <span id="speaker">{{session.speaker}}</span>
+                    </div>
+
+                    <div>
+                        <label for="location">Location: </label>
+                        <span id="location">{{session.location}}</span>
+                    </div>
+
+
+                    <div>
+                        <label for="date">Date: </label>
+                        <span id="date">{{session.date | date:'dd-MMMM-yyyy'}}</span>
+                    </div>
+                    <div>
+                        <label for="startTime">Start Time: </label>
+                        <span id="endDate">{{session.startTime | time:'hh:mm'}}</span>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>

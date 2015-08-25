@@ -9,22 +9,21 @@
             <img class="spinner" src="/img/ajax-loader.gif" ng-show="loading"/>
         </div>
     </div>
-    <div class="row">
+    <div class="row" ng-init="init()">
         <div class="col-md-8">
             <h3>Create a session</h3>
 
             <form name="sessionForm" novalidate role="form">
-
                 <div class="form-group">
                     <label for="conferenceName">Conference Name <span class="required">*</span></label>
                     <span class="label label-danger"
                         ng-show="sessionForm.conferenceName.$error.required">Required!</span>
                     
-                    <select id="conferenceName" ng-model="session.conferenceName" name="conferenceName"
-                            ng-options="conf.name for conf in conferences"  class="form-control">
+                    <select id="conferenceName" ng-model="session.websafeConferenceKey" name="conferenceName"
+                            ng-options="conf.websafeKey as conf.name for conf in conferences"  class="form-control">
                     </select>
                 </div>
-                <p>{{conferences}}</p>
+
 
                 <div class="form-group">
                     <label for="name">Session Name <span class="required">*</span></label>
@@ -97,7 +96,7 @@
 
 
                 <button ng-click="createSession(sessionForm)" class="btn btn-primary"
-                        ng-disabled="!isValidSession(sessionForm) || loading">Create
+                        >Create
                 </button>
             </form>
         </div>

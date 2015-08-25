@@ -102,7 +102,7 @@ CONF_POST_REQUEST = endpoints.ResourceContainer(
 
 SESSION_GET_REQUEST = endpoints.ResourceContainer(
     message_types.VoidMessage,
-    sessionKey=messages.StringField(1),
+    websafeSessionKey=messages.StringField(1),
 )
 
 SESSION_GET_TYPE_REQUEST = endpoints.ResourceContainer(
@@ -530,6 +530,21 @@ class ConferenceApi(remote.Service):
                 items=[self._copySessionToForm(
                     ses, getattr(conf, 'name')) for ses in sessions])
 
+    @endpoints.method(SESSION_GET_REQUEST, SessionForm,
+                      path='session/{websafeSessionKey}',
+                      http_method='GET', name='getSession')
+    def getSession(self, request):
+        """Return requested session (by websafeSessionKey)."""
+        # get Session object from request; bail if not found
+        ses = ndb.Key(urlsafe=request.websafeSessionKey).get()
+
+        if not ses:
+            raise endpoints.NotFoundException(
+                'No session found with key: %s'
+                % request.websafeSessionKey)
+        # return SessionForm
+        return self._copySessionToForm(ses, ses.conferenceName)
+
     @endpoints.method(SESSION_GET_TYPE_REQUEST, SessionForms,
                       path='querySession/{websafeConferenceKey}',
                       http_method='POST',
@@ -582,7 +597,7 @@ class ConferenceApi(remote.Service):
 # - - User Wishlist - - - - - - - - - - - - - - - - - -
 
     @endpoints.method(SESSION_GET_REQUEST, BooleanMessage,
-                      path='sessionWishlist/{sessionKey}',
+                      path='sessionWishlist/{websafeSessionKey}',
                       http_method='GET', name='addSessionToWishlist')
     def addSessionToWishlist(self, request):
         """Add the selected session to the user's wishlist."""
@@ -593,26 +608,59 @@ class ConferenceApi(remote.Service):
             raise endpoints.UnauthorizedException('Authorization required')
         # user_id = getUserId(user)
         prof = self._getProfileFromUser()  # get user Profile
-
-        ses = ndb.Key(urlsafe=request.sessionKey).get()
+        print request.websafeSessionKey
+        ses = ndb.Key(urlsafe=request.websafeSessionKey).get()
         # check that session exists
         if not ses:
             raise endpoints.NotFoundException(
-                'No session found with key: %s' % request.sessionKey)
+                'No session found with key: %s' % request.websafeSessionKey)
 
         conf = ses.key.parent().get()
         if conf.key.urlsafe() not in prof.conferenceKeysToAttend:
             raise endpoints.ForbiddenException(
-                "You have to register the conference before " /
+                "You have to register the conference before " 
                 "you can add this session to your wishlist.")
 
         # check if user already added this session to their wishlist.
-        sesKey = request.sessionKey
+        sesKey = request.websafeSessionKey
         if sesKey in prof.sessionWishlist:
             raise ConflictException(
                 "You have already add this session to your wishlist.")
 
         prof.sessionWishlist.append(sesKey)
+        retval = True
+
+        # write things back to the datastore & return
+        prof.put()
+        return BooleanMessage(data=retval)
+
+    @endpoints.method(SESSION_GET_REQUEST, BooleanMessage,
+                      path='sessionWishlist/{websafeSessionKey}',
+                      http_method='DELETE', name='removeSessionFromWishlist')
+    def removeSessionFromWishlist(self, request):
+        """remove the selected session from the user's wishlist."""
+        retval = None
+        # preload necessary data items
+        user = endpoints.get_current_user()
+        if not user:
+            raise endpoints.UnauthorizedException('Authorization required')
+        # user_id = getUserId(user)
+        prof = self._getProfileFromUser()  # get user Profile
+
+        # ses = ndb.Key(urlsafe=request.sessionKey).get()
+        # check that session exists
+        #if not ses:
+        #    raise endpoints.NotFoundException(
+        #        'No session found with key: %s' % request.sessionKey)
+
+        # check if this session is in their wishlist.
+
+        sesKey = request.websafeSessionKey
+        if sesKey not in prof.sessionWishlist:
+            raise ConflictException(
+                "This session is not in your wishlist yet.")
+
+        prof.sessionWishlist.remove(sesKey)
         retval = True
 
         # write things back to the datastore & return
