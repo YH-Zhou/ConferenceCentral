@@ -108,6 +108,10 @@ SESSION_GET_TYPE_REQUEST = endpoints.ResourceContainer(
     websafeConferenceKey=messages.StringField(2),
 )
 
+SESSION_GET_BY_TYPE_REQUEST = endpoints.ResourceContainer(
+    typeOfSession=messages.StringField(1),
+)
+
 SESSION_GET_TIME_REQUEST = endpoints.ResourceContainer(
     date=messages.StringField(1),
     startTime=messages.StringField(2),
@@ -577,6 +581,22 @@ class ConferenceApi(remote.Service):
                 items=[self._copySessionToForm(
                     ses, getattr(conf, 'name')) for ses in sessions])
 
+
+    @endpoints.method(SESSION_GET_BY_TYPE_REQUEST, SessionForms,
+                      path='querySessionsByType',
+                      http_method='POST',
+                      name='getSessionsByType')
+    def getSessionsByType(self, request):
+        """Query for sessions by type."""
+
+        sessions = Session.query(
+            Session.typeOfSession == request.typeOfSession).fetch()
+
+        # return individual SessionForm object per session
+        return SessionForms(
+                items=[self._copySessionToForm(
+                    ses,getattr(ses.key.parent().get(), 'name')) for ses in sessions])
+
     @endpoints.method(SESSION_QUERY_REQUEST, SessionForms,
                       path='queryConfSessions/{websafeConferenceKey}',
                       http_method='POST', name='queryConferenceSessions')
@@ -590,6 +610,19 @@ class ConferenceApi(remote.Service):
         return SessionForms(
                 items=[self._copySessionToForm(
                     ses, getattr(conf, 'name')) for ses in sessions])
+
+    @endpoints.method(message_types.VoidMessage, SessionForms,
+                      path='getAllSessions',
+                      http_method='GET', name='getAllSessions')
+    def getAllSessions(self, request):
+        """Query for sessions."""
+        # need to fetch all session 
+        sessions = Session.query()
+        # return individual SessionForm object per session
+        return SessionForms(
+                items=[self._copySessionToForm(
+                    ses, getattr(ses.key.parent().get(), 'name')) for ses in sessions])
+
 
     def _getSessionQuery(self, request):
         """Return formatted session query from the submitted filters."""

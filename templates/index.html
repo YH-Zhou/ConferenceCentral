@@ -53,8 +53,14 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li ng-class="{ active: isActive('/conference')}" ng-click="collapseNavbar()"><a href="#/conference">Show Conferences</a></li>
-                <li ng-class="{ active: isActive('/conference/create')}" ng-click="collapseNavbar()"><a href="#/conference/create" >Create Conferences</a></li>
-                <li ng-class="{ active: isActive('/session/create')}" ng-click="collapseNavbar()"><a href="#/session/create" >Create Sessions</a></li>
+                <li ng-class="{ active: isActive('/session')}" ng-click="collapseNavbar()"><a href="#/session">Show Sessions</a></li>
+                <li class="dropdown">
+                <a href="#" data-toggle="dropdown" class="dropdown-toggle">Create <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li ng-class="{ active: isActive('/conference/create')}" ng-click="collapseNavbar()"><a href="#/conference/create" >Create Conferences</a></li>
+                    <li ng-class="{ active: isActive('/session/create')}" ng-click="collapseNavbar()"><a href="#/session/create" >Create Sessions</a></li>
+                </ul>
+                </li>
                 <li class="nav-divider"></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">

@@ -20,6 +20,10 @@ var app = angular.module('conferenceApp',
                     templateUrl: '/partials/show_conferences.html',
                     controller: 'ShowConferenceCtrl'
                 }).
+                when('/session', {
+                    templateUrl: '/partials/show_sessions.html',
+                    controller: 'ShowSessionsCtrl'
+                }).
                 when('/wishlist', {
                     templateUrl: '/partials/show_wishlist.html',
                     controller: 'ShowWishlistCtrl'

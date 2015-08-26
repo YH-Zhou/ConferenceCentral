@@ -274,10 +274,12 @@ conferenceApp.controllers.controller('CreateSessionCtrl',
         
         $scope.conferences = [];
         $scope.init = function () {
+        /**
             if (!oauth2Provider.signedIn) {
                 $scope.messages = "Sorry, please create your own conferences before add any sessions.";
                 return;
             }
+            **/
             $scope.getConferencesCreated();
         };
 
@@ -324,7 +326,9 @@ conferenceApp.controllers.controller('CreateSessionCtrl',
         $scope.types = [
             'Keynote',
             'Lecture',
-            'Workshop'
+            'Workshop',
+            'Talk',
+            'Discussion'
         ];
 
 
@@ -672,6 +676,223 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
 
 
 
+conferenceApp.controllers.controller('ShowSessionsCtrl', function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
+
+    $scope.submitted = false;
+
+    $scope.selectedTab = 'ALL';
+
+    $scope.speaker = '';
+
+    $scope.sessions = [];
+
+    $scope.typeOfSession = '';
+
+    $scope.isOffcanvasEnabled = false;
+
+    /**
+     * Sets the selected tab to 'ALL'
+     */
+    $scope.tabAllSelected = function () {
+        $scope.selectedTab = 'ALL';
+        $scope.querySessions();
+    };
+
+    /**
+     * Sets the selected tab to 'YOUR_WISHLIST'
+     */
+    $scope.tabYourWishlistSelected = function () {
+        $scope.selectedTab = 'YOUR_WISHLIST';
+        if (!oauth2Provider.signedIn) {
+            oauth2Provider.showLoginModal();
+            return;
+        }
+        $scope.querySessions();
+    };
+
+
+    /**
+     * Toggles the status of the offcanvas.
+     */
+    $scope.toggleOffcanvas = function () {
+        $scope.isOffcanvasEnabled = !$scope.isOffcanvasEnabled;
+    };
+
+    /**
+     * Namespace for the pagination.
+     * @type {{}|*}
+     */
+    $scope.pagination = $scope.pagination || {};
+    $scope.pagination.currentPage = 0;
+    $scope.pagination.pageSize = 20;
+    /**
+     * Returns the number of the pages in the pagination.
+     *
+     * @returns {number}
+     */
+    $scope.pagination.numberOfPages = function () {
+        return Math.ceil($scope.sessions.length / $scope.pagination.pageSize);
+    };
+
+    /**
+     * Returns an array including the numbers from 1 to the number of the pages.
+     *
+     * @returns {Array}
+     */
+    $scope.pagination.pageArray = function () {
+        var pages = [];
+        var numberOfPages = $scope.pagination.numberOfPages();
+        for (var i = 0; i < numberOfPages; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
+    /**
+     * Checks if the target element that invokes the click event has the "disabled" class.
+     *
+     * @param event the click event
+     * @returns {boolean} if the target element that has been clicked has the "disabled" class.
+     */
+    $scope.pagination.isDisabled = function (event) {
+        return angular.element(event.target).hasClass('disabled');
+    }
+
+    /**
+     * Query the sessions depending on the tab currently selected.
+     *
+     */
+    $scope.querySessions = function () {
+        $scope.submitted = false;
+        if ($scope.selectedTab == 'ALL') {
+            $scope.querySessionsAll();
+        } else if ($scope.selectedTab == 'YOUR_WISHLIST') {
+            $scope.getSessionsInWishlist();
+        }
+    };
+
+    $scope.querySessionsAll = function () {
+        $scope.loading = true;
+        gapi.client.conference.getAllSessions().
+            execute(function (resp) {
+                $scope.$apply(function () {
+                    $scope.loading = false;
+                    if (resp.error) {
+                        // The request has failed.
+                        var errorMessage = resp.error.message || '';
+                        $scope.messages = 'Failed to get all sessions : ' + errorMessage;
+                        $scope.alertStatus = 'warning';
+                        $log.error($scope.messages + ' filters : ' + JSON.stringify(sendFilters));
+                    } else {
+                        // The request has succeeded.
+                        $scope.submitted = false;
+                        //$scope.messages = 'Query succeeded : ' + JSON.stringify(sendFilters);
+                        $scope.alertStatus = 'success';
+                        $log.info($scope.messages);
+
+                        $scope.sessions = [];
+                        angular.forEach(resp.items, function (session) {
+                            $scope.sessions.push(session);
+                        });
+                    }
+                    $scope.submitted = true;
+                });
+            });
+    };
+
+    $scope.queryBySpeaker = function () {
+        $scope.loading = true;
+        gapi.client.conference.getSessionsBySpeaker({
+            speaker: $scope.speaker
+            }).execute(function (resp) {
+                $scope.$apply(function () {
+                    $scope.loading = false;
+                    if (resp.error) {
+                        // The request has failed.
+                        var errorMessage = resp.error.message || '';
+                        $scope.messages = 'Failed to get sessions by this speaker : ' + errorMessage;
+                        $scope.alertStatus = 'warning';
+                    } else {
+                        // The request has succeeded.
+                        $scope.submitted = false;
+                        $scope.alertStatus = 'success';
+                        $log.info($scope.messages);
+
+                        $scope.sessions = [];
+                        angular.forEach(resp.items, function (session) {
+                            $scope.sessions.push(session);
+                        });
+                    }
+                    $scope.submitted = true;
+                });
+            });
+    };
+
+
+    $scope.queryByTypeOfSession = function () {
+        $scope.loading = true;
+        gapi.client.conference.getSessionsByType({
+            typeOfSession: $scope.typeOfSession
+            }).execute(function (resp) {
+                $scope.$apply(function () {
+                    $scope.loading = false;
+                    if (resp.error) {
+                        // The request has failed.
+                        var errorMessage = resp.error.message || '';
+                        $scope.messages = 'Failed to get sessions of this type : ' + errorMessage;
+                        $scope.alertStatus = 'warning';
+                    } else {
+                        // The request has succeeded.
+                        $scope.submitted = false;
+                        $scope.alertStatus = 'success';
+                        $log.info($scope.messages);
+
+                        $scope.sessions = [];
+                        angular.forEach(resp.items, function (session) {
+                            $scope.sessions.push(session);
+                        });
+                    }
+                    $scope.submitted = true;
+                });
+            });
+    };
+
+
+    $scope.getSessionsInWishlist = function () {
+        $scope.loading = true;
+        gapi.client.conference.getSessionsInWishlist({
+        }).execute(function (resp) {
+                $scope.$apply(function () {
+                    $scope.loading = false;
+                    if (resp.error) {
+                        // The request has failed.
+                        var errorMessage = resp.error.message || '';
+                        $scope.messages = 'Failed to get the sessions in wishlist : ' + errorMessage;
+                        $scope.alertStatus = 'warning';
+                        $log.error($scope.messages);
+
+                        if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
+                            oauth2Provider.showLoginModal();
+                            return;
+                        }
+                    } else {
+                        // The request has succeeded.
+                        $scope.submitted = false;
+                        $scope.alertStatus = 'success';
+
+                        $scope.sessions = [];
+                        angular.forEach(resp.items, function (session) {
+                            $scope.sessions.push(session);
+                        });
+                    }
+                    $scope.submitted = true;
+                });
+            });
+    };
+
+});
+
+
 conferenceApp.controllers.controller('ShowWishlistCtrl', function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
 
     /**
@@ -703,15 +924,6 @@ conferenceApp.controllers.controller('ShowWishlistCtrl', function ($scope, $log,
         $scope.queryConferences();
     };
 
-/**
-    $scope.toggleOffcanvas = function () {
-        $scope.isOffcanvasEnabled = !$scope.isOffcanvasEnabled;
-    };
-**/
-    /**
-     * Namespace for the pagination.
-     * @type {{}|*}
-     */
     $scope.pagination = $scope.pagination || {};
     $scope.pagination.currentPage = 0;
     $scope.pagination.pageSize = 20;
@@ -748,26 +960,6 @@ conferenceApp.controllers.controller('ShowWishlistCtrl', function ($scope, $log,
         return angular.element(event.target).hasClass('disabled');
     }
 
-    /**
-     
-    $scope.addFilter = function () {
-        $scope.filters.push({
-            field: $scope.filtereableFields[0],
-            operator: $scope.operators[0],
-            value: ''
-        })
-    };
-
-    $scope.clearFilters = function () {
-        $scope.filters = [];
-    };
-
-    $scope.removeFilter = function (index) {
-        if ($scope.filters[index]) {
-            $scope.filters.splice(index, 1);
-        }
-    };
-**/
 
     $scope.init = function () {
         $scope.loading = true;

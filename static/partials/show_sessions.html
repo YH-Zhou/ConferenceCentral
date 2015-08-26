@@ -1,0 +1,124 @@
+<div ng-controller="ShowSessionsCtrl">
+    <div class="row">
+        <div class="col-lg-12">
+            <div id="messages" class="alert alert-{{alertStatus}}" ng-show="messages">
+                <span ng-bind="messages"></span>
+                <i class="dismiss-messages pull-right glyphicon glyphicon-remove" ng-click="messages = ''"
+                   ng-show="messages"></i>
+            </div>
+            <img class="spinner" src="/img/ajax-loader.gif" ng-show="loading"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h3>Show Sessions</h3>
+        </div>
+    </div>
+
+    <tabset id="show-sessions-tab" justified="true">
+        <tab select="tabAllSelected()" heading="All Sessions"></tab>
+        <tab select="tabYourWishlistSelected()" heading="Sessions in Your Wishlist"></tab>
+    </tabset>
+
+    <div class="row row-offcanvas row-offcanvas-right" ng-class="{active: isOffcanvasEnabled}">
+        <div class="col-xs-12 col-sm-8">
+            <div class="table-responsive" ng-show="sessions.length > 0">
+                <table id="session-table" class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>Details</th>
+                        <th>Session Name</th>
+                        <th>Conference</th>
+                        <th>Speaker</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="session in sessions | startFrom: pagination.currentPage * pagination.pageSize | limitTo: pagination.pageSize">
+                        <td><a href="#/session/detail/{{session.websafeKey}}">Details</a></td>
+                        <td>{{session.name}}</td>
+                        <td>{{session.conferenceName}}</td>
+                        <td>{{session.speaker}}</td>
+                        <td>{{session.typeOfSession}}</td>
+                        <td>{{session.date | date:'dd-MMMM-yyyy'}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <ul class="pagination" ng-show="sessions.length > 0">
+                <li ng-class="{disabled: pagination.currentPage == 0 }">
+                    <a ng-class="{disabled: pagination.currentPage == 0 }"
+                       ng-click="pagination.isDisabled($event) || (pagination.currentPage = 0)">&lt&lt</a>
+                </li>
+                <li ng-class="{disabled: pagination.currentPage == 0 }">
+                    <a ng-class="{disabled: pagination.currentPage == 0 }"
+                       ng-click="pagination.isDisabled($event) || (pagination.currentPage = pagination.currentPage - 1)">&lt</a>
+                </li>
+
+                <!-- ng-repeat creates a new scope. Need to specify the pagination.currentPage as $parent.pagination.currentPage -->
+                <li ng-repeat="page in pagination.pageArray()" ng-class="{active: $parent.pagination.currentPage == page}">
+                    <a ng-click="$parent.pagination.currentPage = page">{{page + 1}}</a>
+                </li>
+
+                <li ng-class="{disabled: pagination.currentPage == pagination.numberOfPages() - 1}">
+                    <a ng-class="{disabled: pagination.currentPage == pagination.numberOfPages() - 1}"
+                       ng-click="pagination.isDisabled($event) || (pagination.currentPage = pagination.currentPage + 1)">&gt</a>
+                </li>
+                <li ng-class="{disabled: pagination.currentPage == pagination.numberOfPages() - 1}">
+                    <a ng-class="{disabled: pagination.currentPage == pagination.numberOfPages() - 1}"
+                       ng-click="pagination.isDisabled($event) || (pagination.currentPage = pagination.numberOfPages() - 1)">&gt&gt</a>
+                </li>
+            </ul>
+        </div>
+
+
+        <div ng-hide="selectedTab != 'ALL'" class="col-xs-6 col-sm-4 sidebar-offcanvas container" id="sidebar" role="navigation">
+
+            <h4>Filters</h4>
+
+            <div class="panel">
+
+            <label>Search By Speaker: </label>
+            <input type="text" class="" name="value" ng-model="speaker"
+                   ng-required="true">
+            <div class="pull-right">
+            <button ng-hide="selectedTab != 'ALL'" ng-click="queryBySpeaker()" class="btn btn-success btn-sm">
+                <i class="glyphicon glyphicon-search"></i> Search
+            </button>
+            
+            <button ng-hide="selectedTab != 'ALL'" ng-click="tabAllSelected()" class="btn btn-success btn-sm">
+                <i class="glyphicon glyphicon-search"></i> Reset
+            </button>
+            </div>
+            </div>
+
+            <br>
+            <br>
+            
+
+            <div class="panel">
+            <div class="input-group">
+            <label>Search By Type: </label>
+            <input type="text" name="value" ng-model="typeOfSession"
+                   ng-required="true">
+            </div>
+            <div class="pull-right">
+            <button ng-hide="selectedTab != 'ALL'" ng-click="queryByTypeOfSession()" class="btn btn-success btn-sm">
+                <i class="glyphicon glyphicon-search"></i> Search
+            </button>
+            
+            <button ng-hide="selectedTab != 'ALL'" ng-click="tabAllSelected()" class="btn btn-success btn-sm">
+                <i class="glyphicon glyphicon-search"></i> Reset
+            </button>
+            </div>
+            </div>
+
+        </div>
+
+
+</div>
+    </div>
+</div>

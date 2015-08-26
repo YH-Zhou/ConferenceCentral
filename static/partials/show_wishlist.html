@@ -52,11 +52,11 @@
                 <table id="wishlist_sessions-table" class="table table-striped table-hover">
                     <thead>
                     <tr>
-                        <th></th>
-                        <th>Name</th>
+                        <th>Details</th>
+                        <th>Session Name</th>
+                        <th>Conference</th>
                         <th>Speaker</th>
                         <th>Type Of Session</th>
-                        <th>Location</th>
                         <th>Date</th>
                     </tr>
                     </thead>
@@ -64,9 +64,9 @@
                     <tr ng-repeat="session in wishlist_sessions | startFrom: pagination.currentPage * pagination.pageSize | limitTo: pagination.pageSize">
                         <td><a href="#/session/detail/{{session.websafeKey}}">Details</a></td>
                         <td>{{session.name}}</td>
+                        <td>{{session.conferenceName}}</td>
                         <td>{{session.speaker}}</td>
                         <td>{{session.typeOfSession}}</td>
-                        <td>{{session.location}}</td>
                         <td>{{session.date | date:'dd-MMMM-yyyy'}}</td>
                     </tr>
                     </tbody>
