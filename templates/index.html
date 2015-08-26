@@ -39,7 +39,7 @@
 <!-- Restore the credential from cookie if stored by calling initSignInButton() -->
 <body ng-controller="RootCtrl" ng-init="initSignInButton()">
 
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<div class="navbar navbar-inverse navbar-fixed-top navbar-container" role="navigation">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
@@ -55,10 +55,11 @@
                 <li ng-class="{ active: isActive('/conference')}" ng-click="collapseNavbar()"><a href="#/conference">Show Conferences</a></li>
                 <li ng-class="{ active: isActive('/conference/create')}" ng-click="collapseNavbar()"><a href="#/conference/create" >Create Conferences</a></li>
                 <li ng-class="{ active: isActive('/session/create')}" ng-click="collapseNavbar()"><a href="#/session/create" >Create Sessions</a></li>
-                <li ng-class="{ active: isActive('/profile')}" ng-click="collapseNavbar()"><a href="#/profile">My Profile</a></li>
                 <li class="nav-divider"></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
+                <li ng-class="{ active: isActive('/wishlist')}" ng-click="collapseNavbar()"><a href="#/wishlist">Wishlist</a></li>
+                <li ng-class="{ active: isActive('/profile')}" ng-click="collapseNavbar()"><a href="#/profile">Profile</a></li>
                 <li id="signInLink" ng-hide="getSignedInState()"><a ng-click="signIn(); collapseNavbar()">Google+ SignIn</a></li>
                 <li id="signOutLink" ng-show="getSignedInState()"><a ng-click="signOut(); collapseNavbar()">Log out</a></li>
             </ul>

@@ -1,4 +1,4 @@
-<div ng-controller="ShowConferenceCtrl">
+<div ng-controller="ShowWishlistCtrl">
     <div class="row">
         <div class="col-lg-12">
             <div id="messages" class="alert alert-{{alertStatus}}" ng-show="messages">
@@ -10,27 +10,22 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" ng-init="init()">
         <div class="col-lg-12">
-            <h3>Show conferences</h3>
+            <h3>Your Wishlist</h3>
         </div>
     </div>
-
-    <tabset id="show-conferences-tab" justified="true">
-        <tab select="tabAllSelected()" heading="All Conferences"></tab>
-        <tab select="tabYouHaveCreatedSelected()" heading="Conferences You've Created"></tab>
-        <tab select="tabYouWillAttendSelected()" heading="Conferences You'll Attend"></tab>
-    </tabset>
 
     <div class="row row-offcanvas row-offcanvas-right" ng-class="{active: isOffcanvasEnabled}">
         <div class="col-xs-12 col-sm-8">
 
-            <button ng-hide="selectedTab != 'ALL'" ng-click="queryConferences();" class="btn btn-primary pull-right">
+<!--
+            <button  ng-click="querySessions();" class="btn btn-primary pull-right">
                 <i class="glyphicon glyphicon-search"></i> Search
             </button>
 
             <p class="pull-right visible-xs">
-                <button ng-hide="selectedTab != 'ALL'" type="button" class="btn btn-primary btn-sm" data-toggle="offcanvas"
+                <button type="button" class="btn btn-primary btn-sm" data-toggle="offcanvas"
                         ng-click="isOffcanvasEnabled = !isOffcanvasEnabled">
                     <i class="glyphicon glyphicon-chevron-left" ng-show="isOffcanvasEnabled"></i>
                     <span ng-show="isOffcanvasEnabled">Hide</span>
@@ -40,35 +35,45 @@
                 </button>
             </p>
 
-            <div ng-show="submitted && conferences.length == 0">
+            <div ng-show="submitted && wishlist_sessions.length == 0">
                 <h4>No matching results.</h4>
             </div>
-            <div class="table-responsive" ng-show="conferences.length > 0">
-                <table id="conference-table" class="table table-striped table-hover">
+
+-->
+            <div class="container" ng-show="wishlist_sessions.length<=0">
+                <div class="panel panel-success empty-wishlist-panel">
+                    <div class="panel-body">
+                        <p>Your wishlist is empty now!</p> 
+                        <p>Add your interested sessions to your wishlist!</p></div>
+                      </div>
+                      </div>
+
+            <div class="table-responsive" ng-show="wishlist_sessions.length > 0">
+                <table id="wishlist_sessions-table" class="table table-striped table-hover">
                     <thead>
                     <tr>
-                        <th>Details</th>
+                        <th></th>
                         <th>Name</th>
-                        <th>City</th>
-                        <th>Start Date</th>
-                        <th>Organizer</th>
-                        <th>Registered/Open</th>
+                        <th>Speaker</th>
+                        <th>Type Of Session</th>
+                        <th>Location</th>
+                        <th>Date</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="conference in conferences | startFrom: pagination.currentPage * pagination.pageSize | limitTo: pagination.pageSize">
-                        <td><a href="#/conference/detail/{{conference.websafeKey}}">Details</a></td>
-                        <td>{{conference.name}}</td>
-                        <td>{{conference.city}}</td>
-                        <td>{{conference.startDate | date:'dd-MMMM-yyyy'}}</td>
-                        <td>{{conference.organizerDisplayName}}</td>
-                        <td>{{conference.maxAttendees - conference.seatsAvailable}} / {{conference.maxAttendees}}</td>
+                    <tr ng-repeat="session in wishlist_sessions | startFrom: pagination.currentPage * pagination.pageSize | limitTo: pagination.pageSize">
+                        <td><a href="#/session/detail/{{session.websafeKey}}">Details</a></td>
+                        <td>{{session.name}}</td>
+                        <td>{{session.speaker}}</td>
+                        <td>{{session.typeOfSession}}</td>
+                        <td>{{session.location}}</td>
+                        <td>{{session.date | date:'dd-MMMM-yyyy'}}</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
 
-            <ul class="pagination" ng-show="conferences.length > 0">
+            <ul class="pagination" ng-show="wishlist_sessions.length > 0">
                 <li ng-class="{disabled: pagination.currentPage == 0 }">
                     <a ng-class="{disabled: pagination.currentPage == 0 }"
                        ng-click="pagination.isDisabled($event) || (pagination.currentPage = 0)">&lt&lt</a>
@@ -93,8 +98,8 @@
                 </li>
             </ul>
         </div>
-
-        <div ng-hide="selectedTab != 'ALL'" class="col-xs-6 col-sm-4 sidebar-offcanvas" id="sidebar" role="navigation">
+<!--
+        <div class="col-xs-6 col-sm-4 sidebar-offcanvas" id="sidebar" role="navigation">
             <button ng-click="addFilter()" class="btn btn-primary">
                 <i class="glyphicon glyphicon-plus"></i> Filter
             </button>
@@ -131,5 +136,6 @@
             </ul>
         </div>
 
+-->
     </div>
 </div>

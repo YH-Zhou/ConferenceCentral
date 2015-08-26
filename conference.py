@@ -65,10 +65,8 @@ DEFAULTS = {
 }
 
 DEFAULTS_SESSION = {
-    "location": "Default Location",
-    "highlights": "Default topic",
-    "duration": "Default duration",
-    "typeOfSession": "Default type",
+    "location": "None",
+    
 }
 
 OPERATORS = {
@@ -433,7 +431,7 @@ class ConferenceApi(remote.Service):
         # copy SessionForm/ProtoRPC Message into dict
         data = {field.name: getattr(request, field.name)
                 for field in request.all_fields()}
-        del data['conferenceName']
+        #del data['conferenceName']
         del data['websafeConferenceKey']
         del data['websafeKey']
 
@@ -530,6 +528,24 @@ class ConferenceApi(remote.Service):
                 items=[self._copySessionToForm(
                     ses, getattr(conf, 'name')) for ses in sessions])
 
+    @endpoints.method(message_types.VoidMessage, SessionForms,
+                      path='getSessionInWishlist',
+                      http_method='GET',
+                      name='getSessionsInWishlist')
+    def getSessionsInWishlist(self, request):
+        """Query for sessions in wishlist."""
+
+        prof = self._getProfileFromUser()  # get user Profile
+        ses_keys = [ndb.Key(urlsafe=wsck)
+                     for wsck in prof.sessionWishlist]
+        sessions = ndb.get_multi(ses_keys)
+
+        # return individual SessionForm object per Session
+        return SessionForms(
+                items=[self._copySessionToForm(
+                    ses, getattr(ses.key.parent().get(), 'name')) for ses in sessions])
+                    
+
     @endpoints.method(SESSION_GET_REQUEST, SessionForm,
                       path='session/{websafeSessionKey}',
                       http_method='GET', name='getSession')
@@ -543,7 +559,7 @@ class ConferenceApi(remote.Service):
                 'No session found with key: %s'
                 % request.websafeSessionKey)
         # return SessionForm
-        return self._copySessionToForm(ses, ses.conferenceName)
+        return self._copySessionToForm(ses, getattr(ses.key.parent().get(), 'name'))
 
     @endpoints.method(SESSION_GET_TYPE_REQUEST, SessionForms,
                       path='querySession/{websafeConferenceKey}',

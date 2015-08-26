@@ -585,7 +585,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
                     } else {
                         // The request has succeeded.
                         $scope.submitted = false;
-                        $scope.messages = 'Query succeeded : ' + JSON.stringify(sendFilters);
+                        //$scope.messages = 'Query succeeded : ' + JSON.stringify(sendFilters);
                         $scope.alertStatus = 'success';
                         $log.info($scope.messages);
 
@@ -622,7 +622,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
                     } else {
                         // The request has succeeded.
                         $scope.submitted = false;
-                        $scope.messages = 'Query succeeded : Conferences you have created';
+                        //$scope.messages = 'Query succeeded : Conferences you have created';
                         $scope.alertStatus = 'success';
                         $log.info($scope.messages);
 
@@ -660,7 +660,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
                         // The request has succeeded.
                         $scope.conferences = resp.result.items;
                         $scope.loading = false;
-                        $scope.messages = 'Query succeeded : Conferences you will attend (or you have attended)';
+                        //$scope.messages = 'Query succeeded : Conferences you will attend (or you have attended)';
                         $scope.alertStatus = 'success';
                         $log.info($scope.messages);
                     }
@@ -670,6 +670,139 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
     };
 });
 
+
+
+conferenceApp.controllers.controller('ShowWishlistCtrl', function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
+
+    /**
+     * Holds the status if the query is being executed.
+     * @type {boolean}
+     */
+    $scope.submitted = false;
+    
+
+
+    /**
+     * Holds the conferences currently displayed in the page.
+     * @type {Array}
+     */
+    $scope.wishlist_sessions = [];
+
+    /**
+     * Holds the state if offcanvas is enabled.
+     *
+     * @type {boolean}
+     */
+    $scope.isOffcanvasEnabled = false;
+
+    /**
+     * Sets the selected tab to 'ALL'
+     */
+    $scope.tabAllSelected = function () {
+        $scope.selectedTab = 'ALL';
+        $scope.queryConferences();
+    };
+
+/**
+    $scope.toggleOffcanvas = function () {
+        $scope.isOffcanvasEnabled = !$scope.isOffcanvasEnabled;
+    };
+**/
+    /**
+     * Namespace for the pagination.
+     * @type {{}|*}
+     */
+    $scope.pagination = $scope.pagination || {};
+    $scope.pagination.currentPage = 0;
+    $scope.pagination.pageSize = 20;
+    /**
+     * Returns the number of the pages in the pagination.
+     *
+     * @returns {number}
+     */
+    $scope.pagination.numberOfPages = function () {
+        return Math.ceil($scope.wishlist_sessions.length / $scope.pagination.pageSize);
+    };
+
+    /**
+     * Returns an array including the numbers from 1 to the number of the pages.
+     *
+     * @returns {Array}
+     */
+    $scope.pagination.pageArray = function () {
+        var pages = [];
+        var numberOfPages = $scope.pagination.numberOfPages();
+        for (var i = 0; i < numberOfPages; i++) {
+            pages.push(i);
+        }
+        return pages;
+    };
+
+    /**
+     * Checks if the target element that invokes the click event has the "disabled" class.
+     *
+     * @param event the click event
+     * @returns {boolean} if the target element that has been clicked has the "disabled" class.
+     */
+    $scope.pagination.isDisabled = function (event) {
+        return angular.element(event.target).hasClass('disabled');
+    }
+
+    /**
+     
+    $scope.addFilter = function () {
+        $scope.filters.push({
+            field: $scope.filtereableFields[0],
+            operator: $scope.operators[0],
+            value: ''
+        })
+    };
+
+    $scope.clearFilters = function () {
+        $scope.filters = [];
+    };
+
+    $scope.removeFilter = function (index) {
+        if ($scope.filters[index]) {
+            $scope.filters.splice(index, 1);
+        }
+    };
+**/
+
+    $scope.init = function () {
+        $scope.loading = true;
+        gapi.client.conference.getSessionsInWishlist({
+        }).execute(function (resp) {
+                $scope.$apply(function () {
+                    $scope.loading = false;
+                    if (resp.error) {
+                        // The request has failed.
+                        var errorMessage = resp.error.message || '';
+                        $scope.messages = 'Failed to get the sessions in wishlist : ' + errorMessage;
+                        $scope.alertStatus = 'warning';
+                        $log.error($scope.messages);
+
+                        if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
+                            oauth2Provider.showLoginModal();
+                            return;
+                        }
+                    } else {
+                        // The request has succeeded.
+                        $scope.submitted = false;
+                        $scope.alertStatus = 'success';
+
+                        $scope.wishlist_sessions = [];
+                        angular.forEach(resp.items, function (session) {
+                            $scope.wishlist_sessions.push(session);
+                        });
+                    }
+                    $scope.submitted = true;
+                });
+            });
+        
+    };
+
+});
 
 /**
  * @ngdoc controller
@@ -864,7 +997,7 @@ conferenceApp.controllers.controller('SessionDetailCtrl', function ($scope, $log
     $scope.init = function () {
         $scope.loading = true;
         gapi.client.conference.getSession({
-            websafeSessionKey: $routeParams.websafeSessionKey
+            websafeSessionKey: $routeParams.websafeKey
         }).execute(function (resp) {
             $scope.$apply(function () {
                 $scope.loading = false;
@@ -897,7 +1030,7 @@ conferenceApp.controllers.controller('SessionDetailCtrl', function ($scope, $log
                         if ($routeParams.websafeKey == profile.sessionWishlist[i]) {
                             // This session is in the user's wishlist.
                             $scope.alertStatus = 'info';
-                            $scope.messages = 'You have added this session to your wishlist';
+                            $scope.messages = 'This session is in your wishlist';
                             $scope.isInWishlist = true;
                         }
                     }
@@ -913,7 +1046,7 @@ conferenceApp.controllers.controller('SessionDetailCtrl', function ($scope, $log
     $scope.addToWishlist = function () {
         $scope.loading = true;
         gapi.client.conference.addSessionToWishlist({
-            websafeSessionKey: $routeParams.websafeSessionKey
+            websafeSessionKey: $routeParams.websafeKey
         }).execute(function (resp) {
             $scope.$apply(function () {
                 $scope.loading = false;
@@ -949,7 +1082,7 @@ conferenceApp.controllers.controller('SessionDetailCtrl', function ($scope, $log
     $scope.removeFromWishlist = function () {
         $scope.loading = true;
         gapi.client.conference.removeSessionFromWishlist({
-            websafeSessionKey: $routeParams.websafeSessionKey
+            websafeSessionKey: $routeParams.websafeKey
         }).execute(function (resp) {
             $scope.$apply(function () {
                 $scope.loading = false;
@@ -968,7 +1101,6 @@ conferenceApp.controllers.controller('SessionDetailCtrl', function ($scope, $log
                         // Removal succeeded.
                         $scope.messages = 'Removed the session from your wishlist';
                         $scope.alertStatus = 'success';
-                        $scope.conference.seatsAvailable = $scope.conference.seatsAvailable + 1;
                         $scope.isInWishlist = false;
                         $log.info($scope.messages);
                     } else {

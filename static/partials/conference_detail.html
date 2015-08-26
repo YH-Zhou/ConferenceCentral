@@ -23,9 +23,9 @@
                     <label for="organizer">Organizer: </label>
                     <span id="organizer">{{conference.organizerDisplayName}}</span>
                 </div>
-                <p><a class="btn btn-primary" ng-hide="isUserAttending" ng-click="registerForConference()"
+                <p><a class="btn btn-success" ng-hide="isUserAttending" ng-click="registerForConference()"
                         ng-disabled="loading">Register</a></p>
-                <p><a class="btn btn-primary" ng-show="isUserAttending" ng-click="unregisterFromConference()"
+                <p><a class="btn btn-success" ng-show="isUserAttending" ng-click="unregisterFromConference()"
                         ng-disabled="loading">Unregister</a></p>
             </div>
 
@@ -40,7 +40,7 @@
                     <div>
                         <label for="sessions">Sessions: </label>
                         <span id="sessions">
-                            <a href="#/session/detail/{{session.websafeKey}}"><span ng-repeat="session in sessions" class="label label-primary label-separated">{{session.name}}</span></a>
+                            <span ng-repeat="session in sessions" class="label label-success label-separated"><a href="#/session/detail/{{session.websafeKey}}">{{session.name}}</a></span>
                         </span>
                     </div>
 
@@ -51,7 +51,7 @@
                     <div>
                         <label for="topics">Topics: </label>
                         <span id="topics">
-                            <span ng-repeat="topic in conference.topics" class="label label-primary label-separated">{{topic}}</span>
+                            <span ng-repeat="topic in conference.topics" class="label label-success label-separated">{{topic}}</span>
                         </span>
                     </div>
 
