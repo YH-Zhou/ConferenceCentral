@@ -158,7 +158,10 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
             'Las Vegas',
             'New Jersey',
             'HongKong',
-            'Berlin'
+            'Berlin',
+            'Dubai',
+            'Singapore',
+            'Texas'
         ];
 
         /**
@@ -166,6 +169,7 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
          * @type {string[]}
          */
         $scope.topics = [
+            'Art',
             'Medical Innovations',
             'Network Technologies',
             'Big Data',
@@ -175,7 +179,11 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
             'Web Technologies',
             'Movie Making',
             'Biological Breakthroughs',
-            'Health and Nutrition'
+            'Health and Nutrition',
+            'Business',
+            'Education',
+            'Information Technology',
+            'Civil Rights'
         ];
 
         /**
@@ -652,7 +660,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
                     if (resp.error) {
                         // The request has failed.
                         var errorMessage = resp.error.message || '';
-                        $scope.messages = 'Failed to query the conferences to attend : ' + errorMessage;
+                        //$scope.messages = 'Failed to query the conferences to attend : ' + errorMessage;
                         $scope.alertStatus = 'warning';
                         $log.error($scope.messages);
 
