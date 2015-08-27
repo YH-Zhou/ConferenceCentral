@@ -15,10 +15,6 @@
             <div class="well well-sm">
                 <h2>{{session.name}}</h2>
                 <h5>{{session.highlights}}</h5>
-                    <div>
-                        <label for="speaker">Speaker: </label>
-                        <span id="speaker">{{session.speaker}}</span>
-                    </div>
                 <p><a class="btn btn-primary" ng-hide="isInWishlist" ng-click="addToWishlist()"
                         ng-disabled="loading">Add to wishlist</a></p>
                 <p><a class="btn btn-primary" ng-show="isInWishlist" ng-click="removeFromWishlist()"
@@ -28,6 +24,14 @@
             <form class="form" novalidate role="form">
                 <fieldset>
 
+                    <div>
+                        <label for="conf">Conference: </label>
+                        <span id="conf"><em>{{session.conferenceName}}</em></span>
+                    </div>
+                    <div>
+                        <label for="speaker">Speaker: </label>
+                        <span id="speaker"><em>{{session.speaker}}</em></span>
+                    </div>
 
                     <div>
                         <label for="location">Location: </label>

@@ -656,8 +656,10 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
         $scope.loading = true;
         gapi.client.conference.getConferencesToAttend().
             execute(function (resp) {
+                $scope.loading = false;
                 $scope.$apply(function () {
                     if (resp.error) {
+                        
                         // The request has failed.
                         var errorMessage = resp.error.message || '';
                         //$scope.messages = 'Failed to query the conferences to attend : ' + errorMessage;
